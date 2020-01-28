@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:demo/movie_list/movie_detailspage.dart';
 import 'package:demo/movie_list/movie_modal.dart';
@@ -10,18 +12,20 @@ class Movie extends StatefulWidget {
 
 class _MovieState extends State<Movie> {
   List<MovieModal> list = [];
+  Random rnd;
   @override
   Widget build(BuildContext context) {
+    var size = MediaQuery.of(context).size;
+    final double itemHeight = (size.height - kToolbarHeight - 24) / 2;
+    final double itemWidth = size.width / 2;
     return Scaffold(
       appBar: AppBar(
         title: Text("Movie List"),
       ),
       body: Container(
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            SizedBox(
-              height: 0,
-            ),
             Expanded(
               child: CarouselSlider(
                 height: 200.0,
@@ -60,40 +64,44 @@ class _MovieState extends State<Movie> {
             Expanded(
               child: GridView.count(
                   crossAxisCount: 3,
+                  childAspectRatio: (itemWidth / itemHeight),
                   physics: ScrollPhysics(),
                   children: List.generate(movieChoice.length, (index) {
-                    return Center(
-                      child: InkWell(
-                        child: Column(
-                          children: <Widget>[
-                            Expanded(
-                                flex: 8,
-                                child: Image.network(
-                                    movieChoice[index].imagePath)),
-                            Expanded(
-                              flex: 2,
-                              child: Container(
+                    return InkWell(
+                      child: Stack(
+                        alignment: Alignment.bottomLeft,
+                        children: <Widget>[
+                          Image.network(movieChoice[index].imagePath),
+                          Row(
+                            children: <Widget>[
+                              Container(
                                 width: 75,
                                 child: Text(
                                   movieChoice[index].movieTitle,
-                                  style: TextStyle(fontSize: 13),
+                                  style: TextStyle(
+                                      fontSize: 14, color: Colors.white),
                                   textAlign: TextAlign.center,
                                 ),
                               ),
-                            ),
-                          ],
-                        ),
-                        onTap: () {
-                          String id = movieChoice[index].id;
-                          print(id);
-                          if (id.contains(movieChoice[index].id)) {
-                            list.add(movieChoice[index]);
-                          }
-                          Navigator.of(context).push(MaterialPageRoute(
-                              builder: (context) =>
-                                  MovieDetailsPage(id, list)));
-                        },
+                              Text(
+                                movieChoice[index].year,
+                                style: TextStyle(
+                                    fontSize: 14, color: Colors.white),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
+                          )
+                        ],
                       ),
+                      onTap: () {
+                        String id = movieChoice[index].id;
+                        print(id);
+                        if (id.contains(movieChoice[index].id)) {
+                          list.add(movieChoice[index]);
+                        }
+                        Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) => MovieDetailsPage(id, list)));
+                      },
                     );
                   })),
             ),
