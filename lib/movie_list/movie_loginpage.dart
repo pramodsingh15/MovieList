@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:demo/movie_list/movie.dart';
 import 'package:flutter/material.dart';
 
@@ -7,6 +9,7 @@ class MovieLoginPage extends StatefulWidget {
 }
 
 class _MovieLoginPageState extends State<MovieLoginPage> {
+  bool isConnection = false;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -18,7 +21,6 @@ class _MovieLoginPageState extends State<MovieLoginPage> {
               child: Container(
                 height: 400,
                 width: MediaQuery.of(context).size.width,
-               
                 decoration: BoxDecoration(
                     color: Colors.grey[200].withOpacity(0.5),
                     borderRadius: BorderRadius.only(
@@ -52,8 +54,12 @@ class _MovieLoginPageState extends State<MovieLoginPage> {
                         width: double.infinity,
                         child: FlatButton(
                           onPressed: () {
-                            Navigator.of(context).push(MaterialPageRoute(
-                                builder: (context) => Movie()));
+                            if (isConnection) {
+                              Navigator.of(context).push(MaterialPageRoute(
+                                  builder: (context) => Movie()));
+                            } else {
+                              checkInternetConnection(context);
+                            }
                           },
                           color: Colors.white,
                           child: Text("Join Free for a month",
@@ -71,8 +77,12 @@ class _MovieLoginPageState extends State<MovieLoginPage> {
                         color: Colors.transparent,
                         child: FlatButton(
                           onPressed: () {
-                            Navigator.of(context).push(MaterialPageRoute(
-                                builder: (context) => Movie()));
+                            if (isConnection) {
+                              Navigator.of(context).push(MaterialPageRoute(
+                                  builder: (context) => Movie()));
+                            } else {
+                              checkInternetConnection(context);
+                            }
                           },
                           color: Colors.grey[300].withOpacity(0.5),
                           child: Text("Sign In",
@@ -99,5 +109,37 @@ class _MovieLoginPageState extends State<MovieLoginPage> {
         ),
       ),
     );
+  }
+
+  void checkInternetConnection(BuildContext context) async {
+    try {
+      final result = await InternetAddress.lookup('google.com');
+      if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+        print('check connection-------------->connected');
+        isConnection = true;
+      }
+    } on SocketException catch (_) {
+      isConnection = false;
+      print('check connection-------------->not connected');
+      connectionDialog();
+    }
+  }
+
+  void connectionDialog() {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            content: Text("Please check your Internet connection"),
+            actions: <Widget>[
+              FlatButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Text("OK"),
+              )
+            ],
+          );
+        });
   }
 }
